@@ -1,37 +1,6 @@
 const assert = require('assert')
-
-class Component {
-  constructor(name, implementation) {
-    this.dependencies = {}
-    this.name = name
-    this.implementation = implementation
-  }
-
-  depends(dependency) {
-    this.dependencies[dependency] = true
-    return this
-  }
-}
-
-class Architecture {
-  constructor({components} = {components: {}}) {
-    this.components = components
-  }
-
-  register(componentName, implementation) {
-    const component = this.components[componentName] = new Component(componentName, implementation)
-    return component
-  }
-
-  get(componentName) {
-    return new this.components[componentName].implementation()
-  }
-
-  clone() {
-    const components = Object.assign({}, this.components)
-    return new Architecture({components})
-  }
-}
+const Architecture = require('../lib/Architecture')
+const Assembler = require('../lib/Assembler')
 
 describe('architecture', () => {
   it('creates a system with dependencies', () => {
@@ -103,30 +72,6 @@ describe('architecture', () => {
   })
 })
 
-class Assembler {
-  constructor({architecture}) {
-    this.architecture = architecture
-    this.instances = {}
-  }
-
-  resolve(componentName) {
-    const architectureComponent = this.architecture.components[componentName]
-
-    const dependencies = {}
-    Object.keys(architectureComponent.dependencies).forEach(dependency => {
-      const connector = architectureComponent.dependencies[dependency]
-      if (connector instanceof Component) {
-        dependencies[dependency] = new connector.implementation({})
-      //} else if (typeof connector === 'function') {
-        //dependencies[dependency] = new connector()
-      } else {
-        dependencies[dependency] = this.resolve(dependency)
-      }
-    })
-
-    return new architectureComponent.implementation(dependencies)
-  }
-}
 class Server {
   constructor({usersConnector}) {
     this.usersConnector = usersConnector
@@ -139,10 +84,10 @@ class Users {
   }
 }
 
-class UsersConnector {
-}
+class UsersConnector {}
 
 class UserStore {}
+
 class UsersServer {
   constructor({users}) {
     this.users = users
