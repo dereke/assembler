@@ -14,9 +14,10 @@ class Component {
 }
 
 class Architecture {
-  constructor() {
-    this.components = {}
+  constructor({components} = {components: {}}) {
+    this.components = components
   }
+
   register(componentName, implementation) {
     const component = this.components[componentName] = new Component(componentName, implementation)
     return component
@@ -25,27 +26,26 @@ class Architecture {
   get(componentName) {
     return new this.components[componentName].implementation()
   }
+
+  clone() {
+    const components = Object.assign({}, this.components)
+    return new Architecture({components})
+  }
 }
 
 describe('architecture', () => {
   it('creates a system with dependencies', () => {
-    class Server {
-      constructor({users}) {
-        this.users = users
-      }
-    }
-
     const architecture = new Architecture()
-    architecture.register('server', Server).depends('users')
-    architecture.register('users', Users).depends('userStore')
+    architecture.register('server', Server).depends('usersConnector')
+    architecture.register('usersConnector', Users).depends('userStore')
     architecture.register('userStore', UserStore)
 
     const assembler = new Assembler({architecture})
     const server = assembler.resolve('server')
 
     assert(server instanceof Server)
-    assert(server.users instanceof Users)
-    assert(server.users.userStore instanceof UserStore)
+    assert(server.usersConnector instanceof Users)
+    assert(server.usersConnector.userStore instanceof UserStore)
   })
 
   it('creates a system with dependencies and connectors', () => {
@@ -66,6 +66,40 @@ describe('architecture', () => {
 
     assert(usersServer.users instanceof Users)
     assert(usersServer.users.userStore instanceof UserStore)
+  })
+
+  it('cloned architecture works in assembler', () => {
+    const architecture = new Architecture()
+    architecture.register('server', Server).depends('usersConnector')
+    architecture.register('usersConnector', Users)
+
+    const testArchitecture = architecture.clone()
+
+    const assembler = new Assembler({architecture: testArchitecture})
+    const server = assembler.resolve('server')
+
+    assert(server instanceof Server)
+    assert(server.usersConnector instanceof Users)
+  })
+
+  it('substitute component using a cloned architecture', () => {
+    class TestUsers {}
+    const architecture = new Architecture()
+    architecture.register('server', Server).depends('usersConnector')
+    architecture.register('usersConnector', Users)
+
+    const testArchitecture = architecture.clone()
+    testArchitecture.register('usersConnector', TestUsers)
+
+    const testAssembler = new Assembler({architecture: testArchitecture})
+    const testServer = testAssembler.resolve('server')
+
+    assert(testServer.usersConnector instanceof TestUsers)
+
+    const assembler = new Assembler({architecture: architecture})
+    const server = assembler.resolve('server')
+
+    assert(server.usersConnector instanceof Users)
   })
 })
 
