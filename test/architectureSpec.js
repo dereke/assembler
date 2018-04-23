@@ -1,6 +1,5 @@
 const assert = require('assert')
 const Architecture = require('../lib/Architecture')
-const Assembler = require('../lib/Assembler')
 
 describe('architecture', () => {
   it('creates a system with dependencies', () => {
@@ -9,8 +8,7 @@ describe('architecture', () => {
     architecture.register('usersConnector', Users).depends('userStore')
     architecture.register('userStore', UserStore)
 
-    const assembler = new Assembler({architecture})
-    const server = assembler.resolve('server')
+    const server = architecture.resolve('server')
 
     assert(server instanceof Server)
     assert(server.usersConnector instanceof Users)
@@ -26,9 +24,8 @@ describe('architecture', () => {
     architecture.register('users', Users).depends('userStore')
     architecture.register('userStore', UserStore)
 
-    const assembler = new Assembler({architecture})
-    const server = assembler.resolve('server')
-    const usersServer = assembler.resolve('usersServer')
+    const server = architecture.resolve('server')
+    const usersServer = architecture.resolve('usersServer')
 
     assert(server instanceof Server)
     assert(server.usersConnector instanceof UsersConnector)
@@ -44,8 +41,7 @@ describe('architecture', () => {
 
     const testArchitecture = architecture.clone()
 
-    const assembler = new Assembler({architecture: testArchitecture})
-    const server = assembler.resolve('server')
+    const server = testArchitecture.resolve('server')
 
     assert(server instanceof Server)
     assert(server.usersConnector instanceof Users)
@@ -60,14 +56,10 @@ describe('architecture', () => {
     const testArchitecture = architecture.clone()
     testArchitecture.register('usersConnector', TestUsers)
 
-    const testAssembler = new Assembler({architecture: testArchitecture})
-    const testServer = testAssembler.resolve('server')
-
+    const testServer = testArchitecture.resolve('server')
     assert(testServer.usersConnector instanceof TestUsers)
 
-    const assembler = new Assembler({architecture: architecture})
-    const server = assembler.resolve('server')
-
+    const server = architecture.resolve('server')
     assert(server.usersConnector instanceof Users)
   })
 })
