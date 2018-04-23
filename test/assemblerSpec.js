@@ -90,6 +90,34 @@ describe('assembler', () => {
     assert.deepEqual(accountant.components, assembly.components)
     assert.equal(accountant.userName, 'Sherryl')
   })
+
+  it('can enumerate all the assemblies', () => {
+    const architecture = new Architecture()
+    const assembler = new Assembler({architecture})
+    assembler.define('standard')
+    assembler.define('non-standard')
+    assembler.define('extremely-non-standard')
+
+    const assemblies = assembler.map((build, name) => {
+      return {
+        assembly: build(),
+        name
+      }
+    })
+
+    const standard = assemblies[0]
+    const nonStandard = assemblies[1]
+    const extremelyNonStandard = assemblies[2]
+
+    assert.equal(standard.assembly.name, 'standard')
+    assert.equal(standard.name, 'standard')
+
+    assert.equal(nonStandard.assembly.name, 'non-standard')
+    assert.equal(nonStandard.name, 'non-standard')
+
+    assert.equal(extremelyNonStandard.assembly.name, 'extremely-non-standard')
+    assert.equal(extremelyNonStandard.name, 'extremely-non-standard')
+  })
 })
 
 class Server {
