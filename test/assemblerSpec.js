@@ -13,7 +13,8 @@ describe('assembler', () => {
     architecture.register('userStore', UserStore)
 
     const assembler = new Assembler({architecture})
-    const assembly = assembler.build()
+    assembler.define('standard')
+    const assembly = assembler.build('standard')
 
     const components = assembly.components
 
@@ -39,13 +40,32 @@ describe('assembler', () => {
 
 
     const assembler = new Assembler({architecture})
+    assembler.define('standard')
 
-    const assembly = assembler.build()
+    const assembly = assembler.build('standard')
     assert(assembly.components.server.status === undefined)
     assembly.start()
     assert(assembly.components.server.status === 'started')
     assembly.stop()
     assert(assembly.components.server.status === 'stopped')
+  })
+
+  it('assembly can define alternate dependencies', () => {
+    const architecture = new Architecture()
+    architecture.register('server', Server).depends('usersConnector')
+    architecture.register('usersConnector', UsersConnector)
+
+    class TestUsersConnector {}
+
+    const assembler = new Assembler({architecture})
+    assembler.define('in-memory')
+      .register('usersConnector', TestUsersConnector)
+
+    const assembly = assembler.build('in-memory')
+    const components = assembly.components
+
+    assert(components.server instanceof Server)
+    assert(components.usersConnector instanceof TestUsersConnector)
   })
 })
 
