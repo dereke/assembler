@@ -68,6 +68,21 @@ describe('assembler', () => {
     assert(components.usersConnector instanceof TestUsersConnector)
   })
 
+  it('assembly can define additional dependencies', () => {
+    const architecture = new Architecture()
+
+    class TestComponent {}
+
+    const assembler = new Assembler({architecture})
+    assembler.define('in-memory')
+      .register('testComponent', TestComponent)
+
+    const assembly = assembler.build('in-memory')
+    const components = assembly.components
+
+    assert(components.testComponent instanceof TestComponent)
+  })
+
   it('creates an actor', () => {
     const architecture = new Architecture()
     architecture.register('server', Server).depends('usersConnector')
