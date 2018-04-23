@@ -67,6 +67,29 @@ describe('assembler', () => {
     assert(components.server instanceof Server)
     assert(components.usersConnector instanceof TestUsersConnector)
   })
+
+  it('creates an actor', () => {
+    const architecture = new Architecture()
+    architecture.register('server', Server).depends('usersConnector')
+    architecture.register('usersConnector', UsersConnector)
+
+    class Accountant {
+      constructor({components, userName}) {
+        this.components = components
+        this.userName = userName
+      }
+    }
+
+    const assembler = new Assembler({architecture})
+    assembler.define('standard')
+      .actor('Accountant', Accountant)
+
+    const assembly = assembler.build('standard')
+    const accountant = assembly.createActor('Accountant', {userName: 'Sherryl'})
+
+    assert.deepEqual(accountant.components, assembly.components)
+    assert.equal(accountant.userName, 'Sherryl')
+  })
 })
 
 class Server {
