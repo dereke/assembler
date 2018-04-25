@@ -66,6 +66,7 @@ describe('assembler', () => {
 
     assert(components.server instanceof Server)
     assert(components.usersConnector instanceof TestUsersConnector)
+    assert(components.server.usersConnector instanceof TestUsersConnector)
   })
 
   it('assembly can define additional dependencies', () => {
