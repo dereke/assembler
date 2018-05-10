@@ -15,6 +15,19 @@ describe('architecture', () => {
     assert(server.usersConnector.userStore instanceof UserStore)
   })
 
+  it('only creates dependencies once', () => {
+    const architecture = new Architecture()
+    architecture.register('server', Server).depends('usersConnector')
+    architecture.register('otherServer', Server).depends('usersConnector')
+    architecture.register('usersConnector', Users)
+
+    const server = architecture.resolve('server')
+    const otherServer = architecture.resolve('otherServer')
+
+    assert.ok(server.usersConnector)
+    assert(server.usersConnector == otherServer.usersConnector)
+  })
+
   it('creates a system with dependencies and connectors', () => {
     const architecture = new Architecture()
     architecture.register('server', Server).depends('usersConnector')
