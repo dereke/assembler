@@ -84,6 +84,33 @@ describe('assembler', () => {
     assert(components.testComponent instanceof TestComponent)
   })
 
+  it('assembly can extend another assembly', () => {
+    const architecture = new Architecture()
+
+    class TestComponent0 {}
+    class TestComponent1 {}
+    class TestComponent2 {}
+    class TestComponent3 {}
+
+    architecture.register('testComponentRoot', TestComponent0)
+
+    const assembler = new Assembler({architecture})
+    const domMemory = assembler.define('dom-memory')
+    domMemory.register('testComponent', TestComponent1)
+    domMemory.register('testComponentInherit', TestComponent2)
+
+    assembler.define('dom-http-memory')
+      .basedOn('dom-memory')
+      .register('testComponent', TestComponent3)
+
+    const assembly = assembler.build('dom-http-memory')
+    const components = assembly.components
+
+    assert(components.testComponentRoot instanceof TestComponent0)
+    assert(components.testComponentInherit instanceof TestComponent2)
+    assert(components.testComponent instanceof TestComponent3)
+  })
+
   it('creates an actor', () => {
     const architecture = new Architecture()
     architecture.register('server', Server).depends('usersConnector')
