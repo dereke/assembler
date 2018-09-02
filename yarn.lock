@@ -123,6 +123,10 @@ path-is-absolute@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/path-is-absolute/-/path-is-absolute-1.0.1.tgz#174b9268735534ffbc7ace6bf53a5a9e1b5c5f5f"
 
+promise.extra@^3.0.3:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/promise.extra/-/promise.extra-3.0.3.tgz#8ce2d0f33d4c4cd58d79cab326b271c6cfb4731f"
+
 supports-color@4.4.0:
   version "4.4.0"
   resolved "https://registry.yarnpkg.com/supports-color/-/supports-color-4.4.0.tgz#883f7ddabc165142b2a61427f3352ded195d1a3e"

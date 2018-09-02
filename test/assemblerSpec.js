@@ -25,14 +25,14 @@ describe('assembler', () => {
     assert(components.userStore instanceof UserStore)
   })
 
-  it('assembly can be started and stopped', () => {
+  it('assembly can be started and stopped', async () => {
     class StartableServer {
       start() {
-        this.status = 'started'
+        return Promise.resolve().then(() => this.status = 'started')
       }
 
       stop() {
-        this.status = 'stopped'
+        return Promise.resolve().then(() => this.status = 'stoped')
       }
     }
     const architecture = new Architecture()
@@ -43,11 +43,11 @@ describe('assembler', () => {
     assembler.define('standard')
 
     const assembly = assembler.build('standard')
-    assert(assembly.components.server.status === undefined)
-    assembly.start()
-    assert(assembly.components.server.status === 'started')
-    assembly.stop()
-    assert(assembly.components.server.status === 'stopped')
+    assert.equal(assembly.components.server.status, undefined)
+    await assembly.start()
+    assert.equal(assembly.components.server.status, 'started')
+    await assembly.stop()
+    assert.equal(assembly.components.server.status, 'stoped')
   })
 
   it('assembly can define alternate dependencies', () => {
