@@ -161,6 +161,21 @@ describe('assembler', () => {
     assert.equal(extremelyNonStandard.assembly.name, 'extremely-non-standard')
     assert.equal(extremelyNonStandard.name, 'extremely-non-standard')
   })
+
+  it('building an assembly twice results in different instances of components', () => {
+    const assembler = new Assembler()
+    assembler.define('standard').register('server', Server)
+
+    let assembly1
+    let assembly2
+    assembler.map(build => {
+      assembly1 = build()
+      assembly2 = build()
+    })
+
+
+    assert.notEqual(assembly1.components.server, assembly2.components.server)
+  })
 })
 
 class Server {
