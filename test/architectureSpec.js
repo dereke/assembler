@@ -75,6 +75,18 @@ describe('architecture', () => {
     const server = architecture.resolve('server')
     assert(server.usersConnector instanceof Users)
   })
+
+  it('creates a diagram', () => {
+    class TestUsers {}
+    const architecture = new Architecture()
+    architecture.register('server', Server).depends('usersConnector')
+    architecture.register('usersConnector', Users)
+
+    const diagram = architecture.draw()
+    const expectedDiagram = `graph TD
+server["server (Server)"] --> usersConnector["usersConnector (Users)"]`
+    assert.equal(diagram, expectedDiagram)
+  })
 })
 
 class Server {

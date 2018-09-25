@@ -111,6 +111,44 @@ describe('assembler', () => {
     assert(components.testComponent instanceof TestComponent3)
   })
 
+  it('can draw dependencies from an extended assembly', () => {
+    const architecture = new Architecture()
+
+    class TestComponentRoot {}
+    class TestComponentDependency {}
+    class TestComponentAssembly1 {}
+    class TestComponentAssembly2 {}
+
+    architecture.register('testComponentRoot', TestComponentRoot)
+      .depends('testComponentDependency')
+
+    architecture.register('testComponentDependency', TestComponentDependency)
+
+    const assembler = new Assembler({architecture})
+    const domMemory = assembler.define('dom-memory')
+    domMemory.register('testComponentDependency', TestComponentAssembly1)
+
+    const domHttpMemory = assembler.define('dom-http-memory')
+      .basedOn('dom-memory')
+    
+    domHttpMemory.register('testComponentDependency', TestComponentAssembly2)
+
+    const diagram1 = architecture.draw()
+    const expectedDiagram1 = `graph TD
+testComponentRoot["testComponentRoot (TestComponentRoot)"] --> testComponentDependency["testComponentDependency (TestComponentDependency)"]`
+    assert.equal(diagram1, expectedDiagram1)
+
+    const diagram2 = assembler.getAssembly('dom-memory').draw()
+    const expectedDiagram2 = `graph TD
+testComponentRoot["testComponentRoot (TestComponentRoot)"] --> testComponentDependency["testComponentDependency (TestComponentAssembly1)"]`
+    assert.equal(diagram2, expectedDiagram2)
+
+    const diagram3 = assembler.getAssembly('dom-http-memory').draw()
+    const expectedDiagram3 = `graph TD
+testComponentRoot["testComponentRoot (TestComponentRoot)"] --> testComponentDependency["testComponentDependency (TestComponentAssembly2)"]`
+    assert.equal(diagram3, expectedDiagram3)
+  })
+
   it('creates an actor', () => {
     const architecture = new Architecture()
     architecture.register('server', Server).depends('usersConnector')
